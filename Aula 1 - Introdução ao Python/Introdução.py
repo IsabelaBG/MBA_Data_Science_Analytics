@@ -157,14 +157,14 @@ print(tipos)
 
 #%% Dicionários
 
-#Criação
+# Criação
 dict_uf = {"estado": "SP",
            "regiao": "Sudeste"}
 
 print(dict_uf["estado"])
 print(dict_uf["regiao"])
 
-#Adicionar mais elementos
+# Adicionar mais elementos
 dict_uf["pais"] = "Brasil"
 print(dict_uf)
 
@@ -176,3 +176,35 @@ print(dict_uf)
 dataset_1 = pd.DataFrame({'id':["obs_1", "obs_2", "obs_3"],
                           'idade':[60, 28, 53]})
 print(dataset_1)
+
+# Criando variáveis
+# Argumento None, não é texto, é um missing value (NA)
+varA = np.arange(1,11)
+varB = pd.Series([1,2,3,4,5,6,7,8,None,None])
+varC = pd.Series(["a","b","c","d","e","f","g","h","i","j"])
+
+print(varA)
+print(varB)
+print(varC)
+
+# Criando banco de dados
+dataset_2 =  pd.DataFrame({'varA': varA,
+                           'varB' : varB,
+                           'varC' : varC})
+print(dataset_2)  
+
+#%% Importando dados
+
+# Excel
+# Receita anual de vendas para 5 empresas ao longo de 6 anos (Fonte: CVM)
+receita = pd.read_excel("base_receita_empresas.xlsx")
+
+# CSV
+# Dados da OCDE sobre as notas dos países no PISA. Fonte: https://pisadataexplorer.oecd.org/ide/idepisa/dataset.aspx
+# Argumentos adicionais da função: separador (,) e a indicação de decimais (.)
+notas = pd.read_csv("base_notas_pisa.csv", sep=",", decimal=".")
+
+# Link
+# Dados da variação mensal do IPCA
+ipca = pd.read_csv("https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados?formato=csv&dataInicial=01/01/2022&dataFinal=30/09/2024",
+                   sep=";", decimal=",")
