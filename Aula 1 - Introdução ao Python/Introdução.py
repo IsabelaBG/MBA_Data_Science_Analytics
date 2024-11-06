@@ -208,3 +208,259 @@ notas = pd.read_csv("base_notas_pisa.csv", sep=",", decimal=".")
 # Dados da variação mensal do IPCA
 ipca = pd.read_csv("https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados?formato=csv&dataInicial=01/01/2022&dataFinal=30/09/2024",
                    sep=";", decimal=",")
+
+#%% Exportando dados
+# É possível fazer alterações no dataset e salvar
+# CSV - removando index
+dataset_1.to_csv("dataset1.csv", index=False)
+# Excel - removendo index
+dataset_2.to_excel("dataset2.xlsx", index=False)
+
+#%% Funções
+# Funções e iterações automatizam tarefas repetitivase podem facilitar a escrita do código
+# Para criar uma função, existem três etapas básicas:
+# 1. Nomear a função
+# 2. Indicar os argumentos (inputs) que são utilizados na função
+# 3. Indicar o código que será implementado dentro do corpo da função
+# Função com input único
+def converter(milha):
+    km = (milha * 1.6093)
+    return km
+print(converter(60))
+print(converter(100))
+print(converter(20))
+print(converter(30))
+
+# Utilizando série com input
+valores_converter = pd.Series([10,15,10,35])
+print(converter(valores_converter))
+
+# Função com dois inputs
+def calcular_area(b, h):
+  area = (b * h)
+  return area
+
+print(f"{calcular_area(10, 10)}m²")
+print(f"{calcular_area(20, 15)}m²")
+print(f"{calcular_area(50, 30)}m²")
+
+#%% Condições
+# Neste contexto de funções, as condições "if, elif e else" são importantes
+# IF
+valor = 100
+
+if valor == 10**2:
+    print("Valor Correto")
+else:
+    print("Valor incorreto")  
+
+#ELIF
+salario = 3500
+
+if salario <= 1412:
+  print("Até 1 salário mínimo")
+elif salario > 1412 and salario <= 4236:
+  print("Entre de 1 e 3 salários mínimos")
+elif salario > 4236 and salario <= 7060:
+  print("Entre 3 e 5 salários mínimos")
+else:
+  print("Mais de 5 salários mínimos")
+
+# Adicionando condição em função
+def quantidade_salarios(salario):
+    
+    quantidade = (salario/1412)
+    
+    if quantidade <= 10:
+        return quantidade
+    else:
+        return("Mais de 10 salários mínimos")
+
+print(quantidade_salarios(1412))
+print(quantidade_salarios(3000))
+print(quantidade_salarios(14120))
+print(quantidade_salarios(15000))
+
+# Vários inputs e múltiplas condições
+def nova_area(b, h):
+    
+    calculo_area = (b * h) # inserir b e h em metros
+    
+    if calculo_area <= 10000:
+        return calculo_area, "Até 1 hectare"
+    elif calculo_area > 10000 and calculo_area <= 50000:
+        return calculo_area, "Entre 1 e 5 hectares"
+    else:
+        return calculo_area, "Mais de 5 hectares"
+    
+print(nova_area(300, 25))
+print(nova_area(200,100))
+print(nova_area(500, 300))
+
+# Integrando funções existentes
+def coef_var(x):
+  coeficiente = (np.std(x) / np.mean(x)) * 100
+  return np.round(coeficiente, decimals=3)
+
+variavel_cv = pd.Series([10, 25, 40, 35, 15, 28, 31])
+print(f"{coef_var(variavel_cv)}%")
+
+# FOR
+lista_conversao = pd.Series([60, 100, 20, 30])
+lista_km = []
+
+for i in lista_conversao:
+    lista_km.append(i * 1.6093)
+
+print(lista_km)
+
+# WHILE
+saldo_investimento = 100
+lista_invest = []
+
+while saldo_investimento < 10000:
+    saldo_investimento = (saldo_investimento*1.10)
+    lista_invest.append(saldo_investimento)
+
+print(lista_invest)
+
+lista_invest.insert(0, 100)
+
+print(lista_invest)
+
+#%% Conceitos básicos de manipulação de dados
+# Visualizando as primeiras 5 linhas da base importada anteriormente
+print(notas.head(5))
+
+# Variáveis disponíveis
+print(notas.columns)
+
+# Informações detalhadas do banco de dados
+print(notas.info())
+
+# Linhas / observações do banco de dados
+print(notas.shape[0])
+
+# Colunas / variáveis do banco de dados
+print(notas.shape[1])
+
+# Observações e variávies
+# Linhas / observações do banco de dados
+print(notas.shape)
+
+# Seleção de variáveis
+print(notas['country'])
+paises = print(notas['country'])
+paises_2018 = print(notas[['country','reading_2018']])
+
+# Remoção de variáveis
+notas_2022 = notas.drop(columns=['mathematics_2018', 'reading_2018', 'science_2018'])
+
+# O argumento inplace=True pode ser usado para reescrever o objeto existente
+notas_2022.drop(columns=['group'], inplace=True)
+
+# Remover objeto do ambiente
+del paises_2018
+
+# Elementos específicos por posição
+# O primeiro argumento é o número da linha (index), o segundo é a posição da coluna
+
+# Nota de matemática em 2022 para o Brasil
+print(notas.iloc[46,2])
+
+# Todos os valores de todas as variáveis para o Japão
+print(notas.iloc[19,])
+
+# Valores de todas as variáveis para os países de index de 0 a 6
+print(notas.iloc[0:7, ])
+
+# Variáveis que estão nas posições 0, 2 e 5
+notas_matematica = notas.iloc[:, [0,2,5]]
+
+# Selecionar as variáveis que estão nas posições de 0 até 2
+notas_matematica = notas.iloc[:, 0:3]
+
+# Reorganizando variáveis
+notas_2022_ajuste = notas.reindex(['group','country','science_2022','mathematics_2022','reading_2022'],axis = 1)
+
+# Excluindo informações com base no index
+notas_OCDE = notas.drop(notas.index[38:96])
+
+#%% Detalhando manipulações de bancos de dados
+# Em casos de variáveis numéricas estiverem como textos ou "object", fazer ajuste
+# Ajuste utilizando a função "to_numeric", missings serão ajustados pelo coerce e substituídos por nan
+notas['mathematics_2022'] = pd.to_numeric(notas['mathematics_2022'], errors='coerce')
+notas['reading_2022'] = pd.to_numeric(notas['reading_2022'], errors='coerce')
+notas['science_2022'] = pd.to_numeric(notas['science_2022'], errors='coerce')
+notas['mathematics_2018'] = pd.to_numeric(notas['mathematics_2018'], errors='coerce')
+notas['reading_2018'] = pd.to_numeric(notas['reading_2018'], errors='coerce')
+notas['science_2018'] = pd.to_numeric(notas['science_2018'], errors='coerce')
+print(notas.info())
+
+# Excluindo linhas com dados faltantes
+notas_na= notas.dropna()
+
+# Estatísticas descritivas
+notas[['mathematics_2022', 'reading_2022', 'science_2022']].describe()
+
+# Tabela de frequências para variáveis qualitativas
+notas['group'].value_counts()
+
+#%% Operadores
+# Alguns operadores úteis para realizar filtros:
+# "== igual"
+# "> maior"
+# ">= maior ou igual"
+# "< menor"
+# "<= menor ou igual"
+# "!= diferente"
+# "& indica e"
+# "| indica ou"
+
+# Nota de matemática em 2022 maior que 437
+print(notas[notas['mathematics_2022'] > 437])
+
+# Somente grupo OECD
+print(notas[notas['group'] == 'OECD'])
+
+# Grupo OECD e nta menor ou igual a 493
+print(notas[(notas['group'] == 'OECD') & (notas['science_2022'] <= 493)])
+
+# Países que não sejam OECD
+print(notas[notas['group'] != 'OECD'])
+
+# Nota menor do que 386 ou maior do que 480
+print(notas[(notas['reading_2022'] < 386) | (notas['reading_2022'] > 480)])
+
+#%% Agrupamento
+
+notas_grupo = notas.groupby(by=['group'])
+notas_grupo.describe().T # o comando .T apenas fez a transposição da tabela
+
+#%% Ordenação
+
+# Ordem decrescente
+desc_math = notas.sort_values(by=['mathematics_2022'], ascending=False)
+
+# Ordem crescente
+asc_math = notas.sort_values(by=['mathematics_2022'], ascending=True)
+
+#%% Alterar nomes de variáveis
+
+nomes = ["pais",
+         "grupo",
+         "matematica_2022",
+         "leitura_2022",
+         "ciencias_2022",
+         "matematica_2018",
+         "leitura_2018",
+         "ciencias_2018"]
+
+notas.columns = nomes
+
+print(notas.info())
+
+# Trocar apenas um nome:
+notas = notas.rename(columns={'grupo':'grupo_paises'})
+
+print(notas.info())
