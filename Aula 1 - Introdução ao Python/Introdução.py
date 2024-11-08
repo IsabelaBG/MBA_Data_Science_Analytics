@@ -464,3 +464,331 @@ print(notas.info())
 notas = notas.rename(columns={'grupo':'grupo_paises'})
 
 print(notas.info())
+
+#%% Visualização de Dados
+
+# Importações
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+import plotly.io as pio
+pio.renderers.default = 'browser'
+import plotly.graph_objects as go
+
+# Gráfico de barras para contagem
+comercio = pd.read_excel("base_comercio_global.xlsx")
+
+# Criando uma nova figura onde o gráfico será plotado, usando matplotlib
+# Com as dimensões de 15 x 9 polegadas (figsize) e com definição de 600 dpi - dots por inche (dpi)
+plt.figure(figsize=(15,9), dpi = 600)
+
+# Criando gráfico de contagem, usando seaborn, a base comercio importada (data) e contando a coluna market (x)
+sns.countplot(data=comercio, x="market")
+
+# É possível escolher a ordem de apresentação reorganizando os níveis da variável
+plt.figure(figsize=(15,9), dpi = 600)
+sns.countplot(data=comercio, x="market", order=["APAC", "LATAM", "EU", "US", "Africa", "EMEA", "Canada"])
+
+# Adicionar mais formatações
+plt.figure(figsize=(15,9), dpi = 600)
+sns.countplot(data=comercio, x="market", order=["APAC", "LATAM", "EU", "US", "Africa", "EMEA", "Canada"])
+plt.title("Análise por Mercado",fontsize=20)
+plt.xlabel('Mercado',fontsize=15)
+plt.ylabel('Contagem',fontsize=15)
+# Tamanho da fonte dos rótulos dos eixos
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.show()
+
+# Alterando as cores das barras
+plt.figure(figsize=(15,9), dpi = 600)
+sns.countplot(data=comercio, x="market", order=["APAC", "LATAM", "EU", "US", "Africa", "EMEA", "Canada"], color="red")
+plt.title("Análise por Mercado",fontsize=20)
+plt.xlabel('Mercado',fontsize=15)
+plt.ylabel('Contagem',fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.show()
+
+# Algumas paletas do seaborn
+# Bright
+palette = sns.color_palette("bright")
+sns.palplot(palette)
+
+# Viridis
+palette = sns.color_palette("viridis")
+sns.palplot(palette)
+
+# Paired
+palette = sns.color_palette("Paired")
+sns.palplot(palette)
+
+# Rocket
+palette = sns.color_palette("rocket")
+sns.palplot(palette)
+
+# Alterando o tema do gráfico
+plt.figure(figsize=(15,9), dpi = 600)
+# Hue define a coluna que será colorida
+ax = sns.countplot(data=comercio, x="market", hue="market", order=["APAC", "LATAM", "EU", "US", "Africa", "EMEA", "Canada"], palette='viridis', legend=False)
+# Usando função bar_label e objeto containers Matplotlib para adicionar legenda nas barras
+for container in ax.containers: ax.bar_label(container, fontsize=12)
+plt.title("Análise por Mercado",fontsize=20)
+plt.xlabel('Mercado',fontsize=15)
+plt.ylabel('Contagem',fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.show()
+
+# Possível alterar os eixos (variável no eixo Y)
+plt.figure(figsize=(15,9), dpi = 600)
+# Usando seaborn, criando contagem do eixo y
+# order=comercio['market'].value_counts(ascending=False).index: Especifica a ordem das categorias no eixo y. As categorias serão exibidas na ordem decrescente de suas contagens. comercio['market'].value_counts(ascending=False).index retorna os índices das categorias ordenadas pela contagem de forma decrescente.
+ax = sns.countplot(data=comercio, y="market", hue="market",
+                   order = comercio['market'].value_counts(ascending=False).index,
+                   palette = 'viridis', legend=False)
+for container in ax.containers: ax.bar_label(container, padding=1, fontsize=12)
+plt.title("Análise por Mercado",fontsize=20)
+plt.xlabel('Contagem',fontsize=15)
+plt.ylabel('Mercado',fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.show()
+
+# Gráficos de barras
+
+# Calculando as médias das categorias
+comercio_agrupado = comercio[['category', 'profit']].groupby(by=['category']).mean()
+# Ordenando de forma decrescente e add index
+comercio_agrupado = comercio_agrupado.sort_values(by=['profit'], ascending=False).reset_index()
+# Gerando o gráfico
+plt.figure(figsize=(15,9), dpi = 600)
+ax1 = sns.barplot(data=comercio_agrupado, x='category', y='profit', hue='category', palette='rocket')
+# fmt='%.2f': Formata os rótulos como números de ponto flutuante com duas casas decimais.
+# padding=3: Adiciona um espaço entre a barra e o rótulo.
+for container in ax1.containers: ax1.bar_label(container, fmt='%.2f', padding=3, fontsize=12)
+plt.title("Lucro Médio por Categoria",fontsize=20)
+plt.xlabel('Categorias',fontsize=15)
+plt.ylabel('Lucro',fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.show()
+
+# Gráfico de setores / pizza
+
+# Usando pandas para criar tabela cruzada
+# columns='segmento': Especifica uma coluna fictícia chamada 'segmento' para as colunas da tabela cruzada. Como 'segmento' não é uma coluna real do DataFrame, isso cria uma tabela com uma única coluna chamada 'segmento' que contém a contagem de cada valor em comercio['segment'].
+# normalize=True: Normaliza a tabela cruzada para que os valores representem proporções (ou frequências relativas) em vez de contagens absolutas.
+pizza = pd.crosstab(index = comercio['segment'], columns = 'segmento', normalize = True).sort_values('segmento', ascending = False)
+
+# Gerando o gráfico
+plt.figure(figsize=(15,9), dpi = 600)
+plt.pie(pizza['segmento'], 
+        labels = pizza.index, 
+        colors = sns.color_palette('pastel'), 
+        autopct='%.0f%%', # nº de casas decimais 
+        textprops={'fontsize': 20}, # tamanho da fonte
+        pctdistance = 0.6) # posição dos percentuais
+plt.title('Análise por Segmento',fontsize=20)
+plt.show()
+
+# Histograma
+plt.figure(figsize=(15,9), dpi = 600)
+# bins=50: Define o número de intervalos (bins) em que os dados serão agrupados no histograma.
+sns.histplot(data=comercio, x="sales", bins=50)
+plt.xlabel('Valor das Vendas',fontsize=15)
+plt.ylabel('Frequência',fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.show()
+
+# Visualizando apenas um trecho da distribuição da variável
+hist_vendas = comercio[comercio['sales'] < 1000]
+plt.figure(figsize=(15,9), dpi = 600)
+sns.histplot(data=hist_vendas, x="sales", bins=30)
+plt.xlabel('Valor das Vendas',fontsize=15)
+plt.ylabel('Frequência',fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.show()
+
+# Detalhando um pouco mais o gráfico
+plt.figure(figsize=(15,9), dpi = 600)
+# alpha=0.6: Define a transparência das barras do histograma.
+# kde=True: Adiciona uma linha de densidade kernel ao histograma.
+ax2 = sns.histplot(data = hist_vendas, x = "sales", bins=range(0,1100,100), color='blue', alpha=0.6, kde=True)
+ax2.bar_label(ax2.containers[0], fontsize=12)
+plt.xlabel('Valor das Vendas',fontsize=15)
+plt.xticks(ticks=np.arange(0,1100,100))
+plt.ylabel('Frequência',fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.show()
+
+# Gráfico de pontos / scatterplot
+atlas_ambiental = pd.read_excel("base_atlas_ambiental.xlsx")
+plt.figure(figsize=(15,9), dpi = 600)
+sns.scatterplot(data=atlas_ambiental, x="renda", y="escolaridade")
+
+# Possível adicionar outras variáveis. Ex.: na forma de pontos / size
+plt.figure(figsize=(15,9), dpi = 600)
+sns.scatterplot(data=atlas_ambiental, x="renda", y="escolaridade", size="idade")
+plt.title("Indicadores dos Distritos do Município de São Paulo",fontsize=20)
+plt.xlabel('Renda',fontsize=15)
+plt.ylabel('Escolaridade',fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.show()
+
+# Criando uma nova variável indicando "favel" acima ou abaixo da média
+print(atlas_ambiental['favel'].mean())
+atlas_ambiental.loc[atlas_ambiental['favel']<5.93, "indica_favel"] = "Abaixo"
+atlas_ambiental.loc[atlas_ambiental['favel']>=5.93, "indica_favel"] = "Acima"
+
+# Adicionando a variável que será indicada pela cor dos pontos ("hue")
+plt.figure(figsize=(15,9), dpi = 600)
+sns.scatterplot(data=atlas_ambiental, x="renda", y="escolaridade", size="idade", hue="indica_favel")
+plt.title("Indicadores dos Distritos do Município de São Paulo",fontsize=20)
+plt.xlabel('Renda',fontsize=15)
+plt.ylabel('Escolaridade',fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.show()
+
+# Criando outra variável indicando "mortalidade" acima ou abaixo da média
+print(atlas_ambiental['mortalidade'].mean())
+atlas_ambiental.loc[atlas_ambiental['mortalidade'] < 15.99, "mort"] = "Abaixo"
+atlas_ambiental.loc[atlas_ambiental['mortalidade'] >= 15.99, "mort"] = "Acima"
+
+# Adicionando a variável que será indicada pelo tipo dos pontos ("style")
+plt.figure(figsize=(15,9), dpi = 600)
+sns.scatterplot(data=atlas_ambiental, x="renda", y="escolaridade", size="idade", hue="indica_favel", style="mort")
+plt.title("Indicadores dos Distritos do Município de São Paulo",fontsize=20)
+plt.xlabel('Renda',fontsize=15)
+plt.ylabel('Escolaridade',fontsize=15)
+plt.legend(bbox_to_anchor=(1,1), fontsize=9)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.show()
+
+# Verificar graficamente o ajuste linear à nuvem de pontos
+plt.figure(figsize=(15,9), dpi = 600)
+sns.regplot(data=atlas_ambiental, x="renda", y="escolaridade", ci=None)
+plt.title("Indicadores dos Distritos do Município de São Paulo",fontsize=20)
+plt.xlabel('Renda',fontsize=15)
+plt.ylabel('Escolaridade',fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.show()
+
+# Gráficos de linhas / lineplot
+
+receita = pd.read_excel("base_receita_empresas.xlsx")
+plt.figure(figsize=(15,9), dpi = 600)
+sns.lineplot(data=receita, x="ano", y="receita", hue="id_empresa")
+
+# Formatando um pouco mais o gráfico
+plt.figure(figsize=(15,9), dpi = 600)
+sns.lineplot(data=receita, x="ano", y="receita", hue="id_empresa", marker="o")
+plt.title("Receita de Vendas",fontsize=20)
+plt.xlabel('Ano',fontsize=15)
+plt.ylabel('Receita Anual de Vendas',fontsize=15)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+plt.legend(title='Empresa', loc='upper left', fontsize=12)
+plt.show()
+
+# Elaborando um gráfico interativo
+fig_line = px.line(receita, 
+                   x='ano', 
+                   y='receita', 
+                   color='id_empresa', 
+                   markers=True, 
+                   title='Receita de Vendas',
+                   labels={"ano": "Ano",
+                           "receita": "Receita Anual de Vendas",
+                           "id_empresa": "Empresa"})
+
+fig_line.show()
+# Salvando a figura
+fig_line.write_html('grafico_linhas.html')
+
+# Gráfico ou mapa de calor
+
+vendas_regional = pd.read_excel("base_vendas_regiao.xlsx")
+vendas_reg = vendas_regional[['produtoA','produtoB','produtoC']]
+
+# Gerando gráfico de calor no contexto de correlação entre variáveis quantitativas
+# Criando matriz de correlações de Pearson
+corr = vendas_reg.corr()
+
+# Gráfico de calor (heatmap) com o plotly
+fig_heat = go.Figure()
+
+fig_heat.add_trace(
+    go.Heatmap(
+        x = corr.columns,
+        y = corr.index,
+        z = np.array(corr),
+        text=corr.values,
+        texttemplate='%{text:.2f}',
+        colorscale='ice'))
+
+fig_heat.update_layout(
+    height = 600,
+    width = 600)
+
+fig_heat.show()
+
+# Salvando a figura
+fig_heat.write_html('grafico_calor.html')
+
+# Algumas opções de colorscale:
+    # solar
+    # viridis
+    # speed
+    # blues
+    # oranges
+
+# Gráficos boxplot
+vendas_regional = pd.read_excel("base_vendas_regiao.xlsx")
+
+plt.figure(figsize=(15,9), dpi = 600)
+sns.boxplot(data=vendas_regional, y='produtoA', width = 0.5, color = "lightblue")
+plt.xlabel('Produto A',fontsize=15)
+plt.ylabel('Valores',fontsize=15)
+plt.show()
+
+# Adicionando mais boxplot em um mesmo gráfico
+var_boxplot = vendas_regional[['produtoA', 'produtoB', 'produtoC']]
+plt.figure(figsize=(15,9), dpi = 600)
+sns.boxplot(data=var_boxplot, width = 0.6, palette='rocket')
+plt.xlabel('Produtos',fontsize=15)
+plt.ylabel('Valores',fontsize=15)
+plt.show()
+
+# Deixando o gráfico interativo
+fig_box = px.box(var_boxplot,
+                 width = 900)
+
+fig_box.update_layout(title='BOXPLOT',
+                      xaxis_title='Produtos',
+                      yaxis_title='Valores',
+                      plot_bgcolor='lightblue')
+
+fig_box.show()
+# Salvando a figura
+fig_box.write_html('grafico_boxplot.html')
+
+# Pairplot
+
+atlas_ambiental = pd.read_excel("base_atlas_ambiental.xlsx")
+sns.set(rc={"figure.dpi":600})
+sns.pairplot(data=atlas_ambiental.iloc[:,[2,4,5]])
+
+# Adicionando uma variável categórica por meio de cores:
+atlas_ambiental.loc[atlas_ambiental['mortalidade'] < 15.99, "mort"] = "Abaixo"
+atlas_ambiental.loc[atlas_ambiental['mortalidade'] >= 15.99, "mort"] = "Acima"
+sns.set(rc={"figure.dpi":600})
+sns.pairplot(data=atlas_ambiental.iloc[:,[2,4,5,11]], hue='mort')
+plt.savefig('grafico_pairplot.png')
